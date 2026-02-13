@@ -12,9 +12,9 @@ pub enum SaveResult {
 
 impl SaveFolder {
     pub fn new(path: String) -> Result<Self, SaveResult> {
-        let world_name = format!("assets/worlds/{}", path);
-        let folder = fs::create_dir(world_name);
-
+        let world_path = format!("assets/worlds/{}", path);
+        let folder = fs::create_dir(&world_path);
+        let world_file_path = format!("{}/world.toml", world_path);
         let mut file = File::create("foo.txt").unwrap();
         file.write_all(b"Hello, world!").unwrap();
 

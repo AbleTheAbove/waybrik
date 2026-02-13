@@ -1,4 +1,0 @@
-[world]
-display_name = "Sample World"
-folder_name = "sample_world"
-addons = ["core"]
