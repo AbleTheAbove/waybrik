@@ -1,0 +1,4 @@
+[addon]
+name = "core"
+author = "Able"
+deps = []

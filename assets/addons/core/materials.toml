@@ -1,0 +1,6 @@
+[material.nil]
+id = 0
+[material.stone]
+id = 1
+[material.dirt]
+id = 2
