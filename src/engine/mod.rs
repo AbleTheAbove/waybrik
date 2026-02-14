@@ -6,6 +6,7 @@ pub mod asset_loader;
 
 use crate::engine::{
     asset_loader::{AssetBundle, load_assets},
+    chunk::{Chunk, ChunkPos},
     renderer::Renderer,
     world::World,
 };
@@ -45,7 +46,10 @@ impl WayEngine {
     }
 
     pub fn new_world(&mut self) {
-        let w = World::new("test".to_string()).unwrap();
+        let mut w = World::new("test".to_string()).unwrap();
+        let zero_chunk_pos = ChunkPos::new(0, 0, 0);
+        let chunk = Chunk::new(zero_chunk_pos);
+        w.chunk_cache.cache.insert(zero_chunk_pos, chunk);
         self.world = Some(w);
     }
 

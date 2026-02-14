@@ -11,7 +11,7 @@ use std::collections::HashMap;
 #[derive(Serialize, Deserialize, Clone)]
 /// This structure represents an in memory chunk.
 pub struct ChunkCache {
-    cache: HashMap<ChunkPos, Chunk>,
+    pub cache: HashMap<ChunkPos, Chunk>,
 }
 
 #[derive(Debug, Clone)]
@@ -21,9 +21,12 @@ pub enum WorldError {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct World {
-    name: String,
-    chunk_cache: ChunkCache,
-    material_index: MaterialIndex,
+    pub name: String,
+    pub material_index: MaterialIndex,
+    /// Skip the chunk cache when saving to disk.
+    /// The chunk cache will be populated based on player locations.
+    #[serde(skip_serializing)]
+    pub chunk_cache: ChunkCache,
 }
 impl World {
     /// Create a new world. Save it to disk also.

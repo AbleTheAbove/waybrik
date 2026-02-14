@@ -16,6 +16,11 @@ pub struct ChunkPos {
     /// z coordinate.
     pub z: i32,
 }
+impl ChunkPos {
+    pub fn new(x: i32, y: i32, z: i32) -> Self {
+        Self { x, y, z }
+    }
+}
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct ChunkDirtyFlags {

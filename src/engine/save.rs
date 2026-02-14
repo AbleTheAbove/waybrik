@@ -7,9 +7,7 @@ use log::{error, info};
 
 use crate::engine::{paths, world::World};
 
-pub struct SaveFolder {
-    path: String,
-}
+pub struct SaveFolder;
 pub enum SaveResult {
     GenericError,
 }
@@ -20,7 +18,7 @@ impl SaveFolder {
         let folder = fs::create_dir(&world_path);
 
         match folder {
-            Ok(_) => return Ok(SaveFolder { path: path }),
+            Ok(_) => return Ok(SaveFolder),
             Err(err) => match err {
                 _err => {
                     error!("{}", _err);
@@ -47,6 +45,7 @@ impl SaveFolder {
     }
 }
 
+// TODO: filter and sort the materials.
 pub fn world_to_toml(world: &World) -> String {
     let decoded = toml::to_string(world).unwrap();
     decoded
