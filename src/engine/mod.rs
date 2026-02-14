@@ -1,16 +1,19 @@
 //! The waybrik engine.
 
-use log::error;
+use log::{error, warn};
+
+pub mod asset_loader;
 
 use crate::engine::world::World;
 pub mod brick;
 pub mod chunk;
 pub mod materials;
 pub mod paths;
+pub mod renderer;
 pub mod save;
 pub mod world;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum EngineStage {
     MainMenu,
     InWorld,
@@ -36,12 +39,52 @@ impl WayEngine {
     }
 
     pub fn run(&mut self) {
-        loop {
+        let sdl = sdl2::init().unwrap();
+        let video_subsystem = sdl.video().unwrap();
+
+        let gl_attr = video_subsystem.gl_attr();
+
+        gl_attr.set_context_profile(sdl2::video::GLProfile::Core);
+        gl_attr.set_context_version(4, 5);
+
+        let window = video_subsystem
+            .window("Game", 900, 700)
+            .opengl()
+            .resizable()
+            .build()
+            .unwrap();
+        let gl_context = window.gl_create_context().unwrap();
+        let gl = gl::load_with(|s| {
+            video_subsystem.gl_get_proc_address(s) as *const std::os::raw::c_void
+        });
+
+        let mut rend = renderer::Renderer::new();
+        rend.setup();
+
+        let mut event_pump = sdl.event_pump().unwrap();
+        'main: loop {
             // Event loop start
             if self.engine_stage == EngineStage::InWorld && self.world.is_none() {
                 // ERROR OUT HERE.
                 error!("Engine stage is set to InGame but no world is loaded.");
             }
+
+            for event in event_pump.poll_iter() {
+                match event {
+                    sdl2::event::Event::Quit { .. } => break 'main,
+                    _ => {}
+                }
+            }
+
+            // render window contents here
+            rend.render();
+            // flip window buffer
+            window.gl_swap_window();
         }
+    }
+
+    pub fn save(&mut self) {
+        let mut world_clone = self.world.clone().unwrap();
+        world_clone.save();
     }
 }

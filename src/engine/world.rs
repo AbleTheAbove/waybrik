@@ -8,18 +8,18 @@ use crate::engine::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-#[derive(Serialize, serde::Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 /// This structure represents an in memory chunk.
 pub struct ChunkCache {
     cache: HashMap<ChunkPos, Chunk>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum WorldError {
     WorldExists,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct World {
     name: String,
     chunk_cache: ChunkCache,
@@ -49,5 +49,16 @@ impl World {
         let save_path = paths::world_folder(self.name.clone());
         info!("save path in World::save {}", save_path);
         SaveFolder::update(save_path, self);
+    }
+    /// Run the GameTick once.
+    pub fn tick(&mut self) {
+        for (chunk_pos, chunk) in self.chunk_cache.cache.iter_mut() {
+            if chunk.dirty.is_mesh_dirty {
+                // rebuild mesh here.
+            }
+            if chunk.dirty.is_save_dirty {
+                // save here.
+            }
+        }
     }
 }

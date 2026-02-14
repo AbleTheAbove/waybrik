@@ -17,17 +17,17 @@ pub struct ChunkPos {
     pub z: i32,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct ChunkDirtyFlags {
     /// If the mesh is outdated and needs a rebuild flip this.
-    is_mesh_dirty: bool,
+    pub is_mesh_dirty: bool,
     /// If the chunk is updated and needs saving flip this.
-    is_save_dirty: bool,
+    pub is_save_dirty: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Chunk {
-    dirty: ChunkDirtyFlags,
+    pub dirty: ChunkDirtyFlags,
     pub position: ChunkPos,
     bricks: Vec<Brick>,
 }

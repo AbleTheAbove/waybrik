@@ -7,3 +7,11 @@ edition = "2024"
 log = "0.4.29"
 toml = "1.0.1"
 serde = { version = "1.0.225", features = ["derive"] }
+
+
+gl = "0.10.0"
+
+
+[dependencies.sdl2]
+version = "0.31.0"
+# features = ["bundled", "static-link"]
