@@ -1,21 +1,19 @@
 use std::collections::HashMap;
 
-pub enum ShaderAssetType {
-    Fragment,
-    Vertex,
-}
-
-pub struct ShaderAsset {
-    asset_name: String,
-    asset_type: ShaderAssetType,
-}
-
+use crate::engine::asset_loader::shaders::{ShaderAssetType, ShaderBundle};
+mod shaders;
 pub struct AssetBundle {
-    shaders: HashMap<String, ShaderAssetType>,
+    shaders: ShaderBundle,
+}
+
+fn load_shaders() -> ShaderBundle {
+    let shaders = HashMap::new();
+
+    shaders
 }
 
 pub fn load_assets() -> AssetBundle {
     AssetBundle {
-        shaders: HashMap::new(),
+        shaders: load_shaders(),
     }
 }

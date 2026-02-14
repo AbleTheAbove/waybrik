@@ -15,15 +15,10 @@ impl MeshIndex {
             index: HashMap::new(),
         }
     }
-    pub fn new_mesh(&mut self) -> MeshID {
+    pub fn new_mesh(&mut self, verts: Vec<Vertex>, program: u32) -> MeshID {
         let mesh_id = self.next_mesh_id;
 
-        let mesh = Mesh {
-            vbo: 0,
-            vao: 0,
-            verts: vec![],
-            is_dirty: true,
-        };
+        let mesh = Mesh::new(program, verts);
         self.index.insert(mesh_id, mesh);
         self.next_mesh_id += 1;
         mesh_id

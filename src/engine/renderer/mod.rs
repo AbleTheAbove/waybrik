@@ -36,7 +36,6 @@ impl Renderer {
     }
 
     pub fn setup(&mut self) {
-        let mesh_id = self.meshes.new_mesh();
         let verts = vec![
             Vertex {
                 position: [0.0, 0.5],
@@ -48,7 +47,6 @@ impl Renderer {
                 position: [-0.5, -0.5],
             },
         ];
-        // self.meshes.set_mesh(mesh_id, verts);
 
         // TODO reorganize the 6 lines here into the asset loader
         let vs: u32 = compile_shader(VS_SRC, gl::VERTEX_SHADER);
@@ -57,61 +55,12 @@ impl Renderer {
         self.shader_registry.insert("shader.vert".to_string(), vs);
         self.shader_registry.insert("shader.frag".to_string(), fs);
         self.program_registry.insert("shader".to_string(), program);
+
+        let mesh_id = self.meshes.new_mesh(verts, program);
+
         // FINTODO
         unsafe {
             gl::ClearColor(0.3, 0.3, 0.5, 1.0);
-        }
-
-        let mut vao = 0;
-        let mut vbo = 0;
-        unsafe {
-            {
-                // Create Vertex Array Object
-                gl::GenVertexArrays(1, &mut vao);
-                gl::BindVertexArray(vao);
-            }
-            {
-                // Create a Vertex Buffer Object and copy the vertex data to it
-                gl::GenBuffers(1, &mut vbo);
-                gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
-                gl::BufferData(
-                    gl::ARRAY_BUFFER,
-                    size_of_val(&VERTEX_DATA) as GLsizeiptr,
-                    VERTEX_DATA.as_ptr().cast(),
-                    gl::STATIC_DRAW,
-                );
-            }
-            {
-                info!("VAO ID {}", vao);
-                self.vertex_array_registry.insert("VAO0".to_string(), vao);
-                self.vertex_buffer_registry.insert("VBO0".to_string(), vbo);
-                println!("Mesh count {}", self.meshes.index.len());
-                let mesh = self.meshes.index.get_mut(&mesh_id).unwrap();
-                mesh.vao = vao;
-                println!("Mesh vao {}", mesh.vao);
-                mesh.vbo = vbo;
-                println!("Mesh vbo {}", mesh.vbo);
-            }
-            {
-                // Use shader program
-                gl::UseProgram(program);
-                gl::BindFragDataLocation(program, 0, CString::new("out_color").unwrap().as_ptr());
-            }
-
-            {
-                // Specify the layout of the vertex data
-                let pos_attr =
-                    gl::GetAttribLocation(program, CString::new("position").unwrap().as_ptr());
-                gl::EnableVertexAttribArray(pos_attr as GLuint);
-                gl::VertexAttribPointer(
-                    pos_attr as GLuint,
-                    2,
-                    gl::FLOAT,
-                    gl::FALSE as GLboolean,
-                    0,
-                    ptr::null(),
-                );
-            }
         }
     }
 
@@ -147,7 +96,7 @@ impl Renderer {
         }
 
         for (mesh_id, mesh) in self.meshes.index.iter_mut() {
-            info!("Rendering mesh-ID({})", mesh_id);
+            trace!("Rendering mesh-ID({})", mesh_id);
             mesh.render();
         }
     }
