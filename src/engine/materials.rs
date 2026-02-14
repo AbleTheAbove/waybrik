@@ -1,6 +1,9 @@
+use serde::Serialize;
 use std::collections::HashMap;
 
 pub type MaterialId = u8;
+
+#[derive(Serialize, serde::Deserialize)]
 pub struct MaterialIndex {
     index: HashMap<MaterialId, Material>,
 }
@@ -22,7 +25,7 @@ impl MaterialIndex {
         0
     }
 }
-
+#[derive(Serialize, serde::Deserialize)]
 pub struct Material {
     id: MaterialId,
 }

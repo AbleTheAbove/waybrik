@@ -6,6 +6,7 @@ use crate::engine::world::World;
 pub mod brick;
 pub mod chunk;
 pub mod materials;
+pub mod paths;
 pub mod save;
 pub mod world;
 

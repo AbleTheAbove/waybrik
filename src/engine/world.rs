@@ -3,10 +3,12 @@ use log::{error, info, warn};
 use crate::engine::{
     chunk::{Chunk, ChunkPos},
     materials::MaterialIndex,
+    paths,
     save::SaveFolder,
 };
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-
+#[derive(Serialize, serde::Deserialize)]
 /// This structure represents an in memory chunk.
 pub struct ChunkCache {
     cache: HashMap<ChunkPos, Chunk>,
@@ -17,6 +19,7 @@ pub enum WorldError {
     WorldExists,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct World {
     name: String,
     chunk_cache: ChunkCache,
@@ -43,5 +46,8 @@ impl World {
     }
     pub fn save(&mut self) {
         // warn!("Not yet implemented.")
+        let save_path = paths::world_folder(self.name.clone());
+        info!("save path in World::save {}", save_path);
+        SaveFolder::update(save_path, self);
     }
 }
