@@ -28,7 +28,8 @@ pub struct World {
 impl World {
     /// Create a new world. Save it to disk also.
     pub fn new(name: String) -> Result<World, WorldError> {
-        let material_index = MaterialIndex::default();
+        let material_index = MaterialIndex::load_core();
+        println!("{}", material_index);
         let save_ret = SaveFolder::new(name.clone());
         match save_ret {
             Ok(_) => {
@@ -45,7 +46,6 @@ impl World {
         })
     }
     pub fn save(&mut self) {
-        // warn!("Not yet implemented.")
         let save_path = paths::world_folder(self.name.clone());
         info!("save path in World::save {}", save_path);
         SaveFolder::update(save_path, self);

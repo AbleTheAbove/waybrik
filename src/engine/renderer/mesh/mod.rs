@@ -42,20 +42,7 @@ impl Mesh {
                 verts_flat.as_ptr().cast(),
                 gl::STATIC_DRAW,
             );
-        }
 
-        // {
-        //     info!("VAO ID {}", vao);
-        //     self.vertex_array_registry.insert("VAO0".to_string(), vao);
-        //     self.vertex_buffer_registry.insert("VBO0".to_string(), vbo);
-        //     println!("Mesh count {}", self.meshes.index.len());
-        //     let mesh = self.meshes.index.get_mut(&mesh_id).unwrap();
-        //     // mesh.vao = vao;
-        //     // println!("Mesh vao {}", mesh.vao);
-        //     // mesh.vbo = vbo;
-        //     // println!("Mesh vbo {}", mesh.vbo);
-        // }
-        unsafe {
             {
                 // Use shader program
                 gl::UseProgram(program);
@@ -91,6 +78,10 @@ impl Mesh {
         let vao = self.vao;
 
         unsafe {
+            // Use shader program
+            gl::UseProgram(self.program);
+            gl::BindFragDataLocation(self.program, 0, CString::new("out_color").unwrap().as_ptr());
+
             trace!("Binding Vertex Array");
             gl::BindVertexArray(vao);
             trace!("Binding Vertex Buffer Array");

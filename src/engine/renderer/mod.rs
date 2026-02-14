@@ -55,13 +55,9 @@ impl Renderer {
         self.shader_registry.insert("shader.vert".to_string(), vs);
         self.shader_registry.insert("shader.frag".to_string(), fs);
         self.program_registry.insert("shader".to_string(), program);
-
-        let mesh_id = self.meshes.new_mesh(verts, program);
-
         // FINTODO
-        unsafe {
-            gl::ClearColor(0.3, 0.3, 0.5, 1.0);
-        }
+
+        let _mesh_id = self.meshes.new_mesh(verts, program);
     }
 
     pub fn cleanup(&mut self) {
