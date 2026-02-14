@@ -1,16 +1,15 @@
 use std::{collections::HashMap, ffi::CString, ptr};
 
 use gl::types::{GLboolean, GLfloat, GLsizeiptr, GLuint};
-use log::info;
+use log::{debug, info, trace};
 
 use crate::engine::renderer::{
-    mesh::{Mesh, MeshID, MeshIndex},
+    mesh::{Mesh, MeshID, mesh_index::MeshIndex, vertex::VERTEX_DATA},
     shad_comp::{FS_SRC, VS_SRC, compile_shader, link_program},
 };
 
 extern crate sdl2;
-
-static VERTEX_DATA: [GLfloat; 6] = [0.0, 0.5, 0.5, -0.5, -0.5, -0.5];
+use crate::engine::renderer::mesh::vertex::Vertex;
 
 mod mesh;
 mod shad_comp;
@@ -35,10 +34,21 @@ impl Renderer {
             meshes,
         }
     }
-    pub fn setup(&mut self) {
-        let a = self.meshes.new_mesh();
 
-        // self.meshes.insert(k, v)
+    pub fn setup(&mut self) {
+        let mesh_id = self.meshes.new_mesh();
+        let verts = vec![
+            Vertex {
+                position: [0.0, 0.5],
+            },
+            Vertex {
+                position: [0.5, -0.5],
+            },
+            Vertex {
+                position: [-0.5, -0.5],
+            },
+        ];
+        // self.meshes.set_mesh(mesh_id, verts);
 
         // TODO reorganize the 6 lines here into the asset loader
         let vs: u32 = compile_shader(VS_SRC, gl::VERTEX_SHADER);
@@ -53,65 +63,76 @@ impl Renderer {
         }
 
         let mut vao = 0;
-        self.vertex_array_registry
-            .insert("VAO0".to_string(), program);
-
         let mut vbo = 0;
-        self.vertex_buffer_registry
-            .insert("VBO0".to_string(), program);
-
         unsafe {
-            // Create Vertex Array Object
-            gl::GenVertexArrays(1, &mut vao);
-            gl::BindVertexArray(vao);
+            {
+                // Create Vertex Array Object
+                gl::GenVertexArrays(1, &mut vao);
+                gl::BindVertexArray(vao);
+            }
+            {
+                // Create a Vertex Buffer Object and copy the vertex data to it
+                gl::GenBuffers(1, &mut vbo);
+                gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
+                gl::BufferData(
+                    gl::ARRAY_BUFFER,
+                    size_of_val(&VERTEX_DATA) as GLsizeiptr,
+                    VERTEX_DATA.as_ptr().cast(),
+                    gl::STATIC_DRAW,
+                );
+            }
+            {
+                info!("VAO ID {}", vao);
+                self.vertex_array_registry.insert("VAO0".to_string(), vao);
+                self.vertex_buffer_registry.insert("VBO0".to_string(), vbo);
+                println!("Mesh count {}", self.meshes.index.len());
+                let mesh = self.meshes.index.get_mut(&mesh_id).unwrap();
+                mesh.vao = vao;
+                println!("Mesh vao {}", mesh.vao);
+                mesh.vbo = vbo;
+                println!("Mesh vbo {}", mesh.vbo);
+            }
+            {
+                // Use shader program
+                gl::UseProgram(program);
+                gl::BindFragDataLocation(program, 0, CString::new("out_color").unwrap().as_ptr());
+            }
 
-            // Create a Vertex Buffer Object and copy the vertex data to it
-            gl::GenBuffers(1, &mut vbo);
-            gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
-            gl::BufferData(
-                gl::ARRAY_BUFFER,
-                size_of_val(&VERTEX_DATA) as GLsizeiptr,
-                VERTEX_DATA.as_ptr().cast(),
-                gl::STATIC_DRAW,
-            );
-
-            // Use shader program
-            gl::UseProgram(program);
-            gl::BindFragDataLocation(program, 0, CString::new("out_color").unwrap().as_ptr());
-
-            // Specify the layout of the vertex data
-            let pos_attr =
-                gl::GetAttribLocation(program, CString::new("position").unwrap().as_ptr());
-            gl::EnableVertexAttribArray(pos_attr as GLuint);
-            gl::VertexAttribPointer(
-                pos_attr as GLuint,
-                2,
-                gl::FLOAT,
-                gl::FALSE as GLboolean,
-                0,
-                ptr::null(),
-            );
+            {
+                // Specify the layout of the vertex data
+                let pos_attr =
+                    gl::GetAttribLocation(program, CString::new("position").unwrap().as_ptr());
+                gl::EnableVertexAttribArray(pos_attr as GLuint);
+                gl::VertexAttribPointer(
+                    pos_attr as GLuint,
+                    2,
+                    gl::FLOAT,
+                    gl::FALSE as GLboolean,
+                    0,
+                    ptr::null(),
+                );
+            }
         }
     }
 
     pub fn cleanup(&mut self) {
-        for (program_name, program_id) in self.program_registry.iter() {
+        for (_program_name, program_id) in self.program_registry.iter() {
             unsafe {
                 gl::DeleteProgram(*program_id);
             }
         }
-        for (shader_name, shader_id) in self.shader_registry.iter() {
+        for (_shader_name, shader_id) in self.shader_registry.iter() {
             unsafe {
                 gl::DeleteShader(*shader_id);
             }
         }
 
-        for (vbo_name, vbo_id) in self.vertex_buffer_registry.iter() {
+        for (_vbo_name, vbo_id) in self.vertex_buffer_registry.iter() {
             unsafe {
                 gl::DeleteBuffers(1, vbo_id);
             }
         }
-        for (vao_name, vao_id) in self.vertex_array_registry.iter() {
+        for (_vao_name, vao_id) in self.vertex_array_registry.iter() {
             unsafe {
                 gl::DeleteVertexArrays(1, vao_id);
             }
@@ -125,18 +146,9 @@ impl Renderer {
             gl::Clear(gl::COLOR_BUFFER_BIT);
         }
 
-        for (mesh_id, mesh) in self.meshes.index.iter() {
-            let vbo = mesh.vbo;
-            let vao = mesh.vao;
-
-            unsafe {
-                info!("Binding Vertex Array");
-                gl::BindVertexArray(vao);
-                info!("Binding Vertex Buffer Array");
-                gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
-                // TODO: keep track of triangle count on the mesh.
-                gl::DrawArrays(gl::TRIANGLES, 0, 3);
-            }
+        for (mesh_id, mesh) in self.meshes.index.iter_mut() {
+            info!("Rendering mesh-ID({})", mesh_id);
+            mesh.render();
         }
     }
 }

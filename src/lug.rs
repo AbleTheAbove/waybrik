@@ -5,7 +5,7 @@ pub struct Lugger;
 
 impl log::Log for Lugger {
     fn enabled(&self, metadata: &Metadata) -> bool {
-        metadata.level() <= Level::Info
+        metadata.level() <= Level::Debug
     }
 
     fn log(&self, record: &Record) {

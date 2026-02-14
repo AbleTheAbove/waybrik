@@ -59,7 +59,7 @@ impl WayEngine {
         gl_attr.set_context_version(4, 5);
 
         let window = video_subsystem
-            .window("Game", 900, 700)
+            .window("Waybrik", 900, 700)
             .opengl()
             .resizable()
             .build()

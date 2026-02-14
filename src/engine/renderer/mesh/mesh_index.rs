@@ -1,19 +1,8 @@
 use std::collections::HashMap;
 
-use gl::types::GLfloat;
+use log::info;
 
-pub type MeshID = u64;
-
-static VERTEX_DATA: [GLfloat; 6] = [0.0, 0.5, 0.5, -0.5, -0.5, -0.5];
-#[derive(Clone)]
-pub struct Vertex {}
-
-#[derive(Clone)]
-pub struct Mesh {
-    pub vbo: u32,
-    pub vao: u32,
-    pub verts: Vec<Vertex>,
-}
+use crate::engine::renderer::mesh::{Mesh, MeshID, Vertex};
 
 pub struct MeshIndex {
     next_mesh_id: MeshID,
@@ -33,9 +22,16 @@ impl MeshIndex {
             vbo: 0,
             vao: 0,
             verts: vec![],
+            is_dirty: true,
         };
         self.index.insert(mesh_id, mesh);
         self.next_mesh_id += 1;
         mesh_id
+    }
+    pub fn set_mesh(&mut self, mesh_id: MeshID, verts: Vec<Vertex>) {
+        let mesh = self.index.get_mut(&mesh_id).unwrap();
+        mesh.verts = verts;
+        mesh.is_dirty = true;
+        info!("Mesh set.");
     }
 }
