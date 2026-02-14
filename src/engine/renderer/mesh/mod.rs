@@ -27,6 +27,10 @@ impl Mesh {
         for vert in verts.clone() {
             verts_flat.push(vert.position[0]);
             verts_flat.push(vert.position[1]);
+            // TODO: Handle vertex color.
+            // verts_flat.push(vert.color[0]);
+            // verts_flat.push(vert.color[1]);
+            // verts_flat.push(vert.color[2]);
         }
         let mut vao = 0;
         let mut vbo = 0;
