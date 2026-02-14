@@ -13,3 +13,9 @@ pub struct ShaderAsset {
 pub struct AssetBundle {
     shaders: HashMap<String, ShaderAssetType>,
 }
+
+pub fn load_assets() -> AssetBundle {
+    AssetBundle {
+        shaders: HashMap::new(),
+    }
+}

@@ -4,7 +4,11 @@ use log::{error, warn};
 
 pub mod asset_loader;
 
-use crate::engine::{renderer::Renderer, world::World};
+use crate::engine::{
+    asset_loader::{AssetBundle, load_assets},
+    renderer::Renderer,
+    world::World,
+};
 pub mod brick;
 pub mod chunk;
 pub mod materials;
@@ -25,15 +29,18 @@ pub struct WayEngine {
     /// If no world is loaded we are in the main menu.
     pub world: Option<World>,
     pub renderer: Renderer,
+    pub assets: AssetBundle,
 }
 impl WayEngine {
     pub fn new() -> Self {
-        let rend = renderer::Renderer::new();
+        let assets = load_assets();
+        let renderer = renderer::Renderer::new();
 
         Self {
             world: None,
-            renderer: rend,
+            renderer,
             engine_stage: EngineStage::MainMenu,
+            assets,
         }
     }
 
@@ -84,6 +91,8 @@ impl WayEngine {
             // flip window buffer
             window.gl_swap_window();
         }
+
+        self.renderer.cleanup();
     }
 
     pub fn save(&mut self) {

@@ -1,13 +1,18 @@
 use std::{collections::HashMap, ffi::CString, ptr};
 
 use gl::types::{GLboolean, GLfloat, GLsizeiptr, GLuint};
+use log::info;
 
-use crate::engine::renderer::shad_comp::{FS_SRC, VS_SRC, compile_shader, link_program};
+use crate::engine::renderer::{
+    mesh::{Mesh, MeshID, MeshIndex},
+    shad_comp::{FS_SRC, VS_SRC, compile_shader, link_program},
+};
 
 extern crate sdl2;
 
 static VERTEX_DATA: [GLfloat; 6] = [0.0, 0.5, 0.5, -0.5, -0.5, -0.5];
 
+mod mesh;
 mod shad_comp;
 
 pub struct Renderer {
@@ -15,19 +20,27 @@ pub struct Renderer {
     program_registry: HashMap<String, u32>,
     vertex_array_registry: HashMap<String, u32>,
     vertex_buffer_registry: HashMap<String, u32>,
+    pub meshes: MeshIndex,
 }
 
 impl Renderer {
     pub fn new() -> Self {
+        let meshes = MeshIndex::new();
+
         Self {
             shader_registry: HashMap::new(),
             program_registry: HashMap::new(),
             vertex_array_registry: HashMap::new(),
             vertex_buffer_registry: HashMap::new(),
+            meshes,
         }
     }
     pub fn setup(&mut self) {
-        // TODO reorganize the 6 lines here
+        let a = self.meshes.new_mesh();
+
+        // self.meshes.insert(k, v)
+
+        // TODO reorganize the 6 lines here into the asset loader
         let vs: u32 = compile_shader(VS_SRC, gl::VERTEX_SHADER);
         let fs = compile_shader(FS_SRC, gl::FRAGMENT_SHADER);
         let program = link_program(vs, fs);
@@ -110,8 +123,20 @@ impl Renderer {
             // Clear the screen to black
             gl::ClearColor(0.3, 0.3, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
-            // Draw a triangle from the 3 vertices
-            gl::DrawArrays(gl::TRIANGLES, 0, 3);
+        }
+
+        for (mesh_id, mesh) in self.meshes.index.iter() {
+            let vbo = mesh.vbo;
+            let vao = mesh.vao;
+
+            unsafe {
+                info!("Binding Vertex Array");
+                gl::BindVertexArray(vao);
+                info!("Binding Vertex Buffer Array");
+                gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
+                // TODO: keep track of triangle count on the mesh.
+                gl::DrawArrays(gl::TRIANGLES, 0, 3);
+            }
         }
     }
 }
