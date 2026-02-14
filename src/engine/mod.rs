@@ -4,7 +4,7 @@ use log::{error, warn};
 
 pub mod asset_loader;
 
-use crate::engine::world::World;
+use crate::engine::{renderer::Renderer, world::World};
 pub mod brick;
 pub mod chunk;
 pub mod materials;
@@ -24,11 +24,15 @@ pub struct WayEngine {
     pub engine_stage: EngineStage,
     /// If no world is loaded we are in the main menu.
     pub world: Option<World>,
+    pub renderer: Renderer,
 }
 impl WayEngine {
     pub fn new() -> Self {
+        let rend = renderer::Renderer::new();
+
         Self {
             world: None,
+            renderer: rend,
             engine_stage: EngineStage::MainMenu,
         }
     }
@@ -58,8 +62,7 @@ impl WayEngine {
             video_subsystem.gl_get_proc_address(s) as *const std::os::raw::c_void
         });
 
-        let mut rend = renderer::Renderer::new();
-        rend.setup();
+        self.renderer.setup();
 
         let mut event_pump = sdl.event_pump().unwrap();
         'main: loop {
@@ -77,7 +80,7 @@ impl WayEngine {
             }
 
             // render window contents here
-            rend.render();
+            self.renderer.render();
             // flip window buffer
             window.gl_swap_window();
         }
