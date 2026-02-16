@@ -3,6 +3,8 @@ use mlua::UserData;
 use mlua::Value;
 use mlua::prelude::*;
 
+use crate::engine::object::Object;
+
 #[derive(Clone)]
 pub struct GameEvent {
     event_type: String,
@@ -40,22 +42,17 @@ impl UserData for GameEvent {
         // });
     }
 }
-
-pub fn addon() -> LuaResult<()> {
-    let lua = Lua::new();
+pub fn register_api(lua: Lua) -> LuaResult<Lua> {
     let globals = lua.globals();
 
-    let game_event_table = lua.create_table()?;
+    // let f = lua
+    //     .create_function(|_, ()| -> LuaResult<()> {
+    //         // panic!("test panic");
+    //         Ok(())
+    //     })
+    //     .unwrap();
 
-    game_event_table.set("count", 0)?;
-
-    globals.set("game_event_table", game_event_table)?;
-    let f = lua.create_function(|_, ()| -> LuaResult<()> {
-        // panic!("test panic");
-        Ok(())
-    })?;
-
-    lua.globals().set("new_inventory", f)?;
+    // globals.set("new_inventory", f).unwrap();
 
     let game_event_constructor = lua.create_function(|_, (game_event_type): (String)| {
         Ok(GameEvent {
@@ -64,22 +61,12 @@ pub fn addon() -> LuaResult<()> {
     })?;
     globals.set("GameEvent", game_event_constructor)?;
 
-    let lua_src = lua
-        .load(include_str!(
-            "../../../assets/addons/core/objects/mud_mixer.lua"
-        ))
-        .set_name("example code");
-    lua_src.exec()?;
+    Ok(lua)
+}
 
-    let on_start: Function = globals.get("on_build")?;
-    on_start.call::<()>(())?;
-    let game_event_table: Result<LuaTable, LuaError> = globals.get("game_event_table");
-
-    for event in game_event_table.iter() {
-        println!("Event needs to be handled.")
-    }
-
-    // lua_src.call();
-
+pub fn addon() -> LuaResult<()> {
+    let mut obj = Object::spawn_from_script("mud_mixer".to_string()).unwrap();
+    let a = obj.fire_tick();
+    println!("{:?}", a);
     Ok(())
 }

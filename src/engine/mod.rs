@@ -13,6 +13,7 @@ pub mod asset_loader;
 pub mod brick;
 pub mod chunk;
 pub mod materials;
+pub mod object;
 pub mod paths;
 pub mod renderer;
 pub mod save;
@@ -90,6 +91,15 @@ impl WayEngine {
                 match event {
                     sdl2::event::Event::Quit { .. } => break 'main,
                     _ => {}
+                }
+            }
+            {
+                // TODO Check if engine tick needs running.
+                if self.world.is_some() {
+                    let world = self.world.as_mut().unwrap();
+                    // println!("World ticked");
+                    world.tick();
+                    // self.world =
                 }
             }
 

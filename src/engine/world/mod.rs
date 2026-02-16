@@ -4,6 +4,7 @@ use crate::engine::{
     brick::InventoryID,
     chunk::{Chunk, ChunkPos},
     materials::MaterialIndex,
+    object::{Object, ObjectCache, ObjectID},
     paths,
     save::SaveFolder,
     world::inventory::{Inventory, InventoryCache},
@@ -33,6 +34,8 @@ pub struct World {
     pub chunk_cache: ChunkCache,
     #[serde(skip_serializing)]
     pub inventory_cache: InventoryCache,
+    #[serde(skip_serializing)]
+    pub object_cache: ObjectCache,
 }
 impl World {
     /// Create a new world. Save it to disk also.
@@ -47,6 +50,11 @@ impl World {
         let mut inv_cache = InventoryCache::new();
         let inv = Inventory { items: vec![] };
         inv_cache.cache.insert(InventoryID { id: 0 }, inv);
+
+        let mut objects = ObjectCache::new();
+        let object_a = Object::spawn_from_script("mud_mixer".to_string()).unwrap();
+        objects.cache.insert(ObjectID { id: 10 }, object_a);
+
         Ok(Self {
             name,
             chunk_cache: ChunkCache {
@@ -54,6 +62,7 @@ impl World {
             },
             material_index,
             inventory_cache: inv_cache,
+            object_cache: objects,
         })
     }
     pub fn save(&mut self) {
@@ -62,7 +71,7 @@ impl World {
         SaveFolder::update(save_path, self);
     }
     /// Run the GameTick once.
-    pub fn tick(&mut self) {
+    pub fn tick(&mut self) -> &mut Self {
         for (chunk_pos, chunk) in self.chunk_cache.cache.iter_mut() {
             if chunk.dirty.is_mesh_dirty {
                 // rebuild mesh here.
@@ -71,5 +80,10 @@ impl World {
                 // save here.
             }
         }
+
+        for (object_id, object) in self.object_cache.cache.iter_mut() {
+            object.fire_tick();
+        }
+        self
     }
 }

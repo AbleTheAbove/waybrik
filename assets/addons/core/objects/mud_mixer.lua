@@ -24,8 +24,20 @@ end
 
 
 function on_tick()
- print("Mud machine ticked.")
+ machine_state.tick_count = machine_state.tick_count + 1
+ if machine_state.tick_count >= 10 then
+  machine_state.tick_count = 0
+  -- Do the tenth tick magic.
+  on_ten_tick() 
+ end
+ 
+ print("Mud mixer ticked. On tick "..machine_state.tick_count)
 end
 
 function on_ten_tick()
+ -- TODO process inventory item a and inventory item b into mud
+ -- TODO set up trace functionality so the logs can help
+ print("Ten Tick")
+ local temp_inventory = get_inventory()
+ local item_in_liquid_slot = temp_inventory.slot["liquid"]
 end
