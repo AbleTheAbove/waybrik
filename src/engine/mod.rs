@@ -39,8 +39,8 @@ impl WayEngine {
         let assets = load_assets();
         let renderer = renderer::Renderer::new();
 
-        let ret = addons::addon();
-        println!("lua ret {:?}", ret);
+        // let ret = addons::addon();
+        // println!("lua ret {:?}", ret);
 
         Self {
             world: None,

@@ -39,41 +39,43 @@ impl Object {
         let mut ges = vec![];
         let lua = &self.lua;
         let globals = lua.globals();
-        let game_event_table: LuaTable = globals.get("game_event_table")?;
-        let new_game_event_count: i32 = game_event_table.get("count")?;
-        println!(
-            "{} new game events queued by this object.",
-            new_game_event_count
-        );
-        for game_event_idx in 0..new_game_event_count {
-            let events_array: Result<GameEvent, LuaError> = game_event_table.get("events");
-        }
-
-        // let game_event_type: String = game_event_table.get("event_type")?;
-
-        // for even in game_event_table {
-        //     println!("game event {:?}", even);
-        //     let game_event_type: String =
-        //         even.get("event_type").unwrap_or("MarkerEvent".to_string());
-
-        //     let count: Result<i32, LuaError> = game_event_table.get("count")?;
-
-        //     let game_event = GameEvent {
-        //         event_type: game_event_type.to_string(),
-        //     };
-        //     info!("Game event {:?}", game_event);
-        //     ges.push(game_event);
+        // let game_event_table: LuaTable = globals.get("game_event_table")?;
+        // let new_game_event_count: i32 = game_event_table.get("count")?;
+        // println!(
+        //     "{} new game events queued by this object.",
+        //     new_game_event_count
+        // );
+        // let events_array: LuaTable = game_event_table.get("events")?;
+        // for game_event_idx in 0..new_game_event_count {
+        //     let event = events_array.get(game_event_idx)?;
+        //     ges.push(event);
         // }
 
         Ok(ges)
     }
-    pub fn fire_tick(&mut self) -> LuaResult<()> {
+    pub fn fire_tick(&mut self) -> LuaResult<Vec<GameEvent>> {
+        let mut ges = vec![];
         let globals = self.lua.globals();
 
         let on_start: Function = globals.get("on_tick")?;
         on_start.call::<()>(())?;
+
+        let game_event_table: LuaTable = globals.get("game_event_table")?;
+        let new_game_event_count: i32 = game_event_table.get("count")?;
+        if new_game_event_count > 0 {
+            println!(
+                "{} new game events queued by this object.",
+                new_game_event_count
+            );
+        }
+        let events_array: LuaTable = game_event_table.get("events")?;
+        for game_event_idx in 0..new_game_event_count {
+            let event = events_array.get(game_event_idx)?;
+            ges.push(event);
+        }
+
         // TODO: Handle reading in GameEvents here.
-        Ok(())
+        Ok(ges)
     }
     pub fn spawn_from_script(script_name: String) -> LuaResult<Self> {
         let object_name = format!("Object {}", script_name);
@@ -90,16 +92,11 @@ impl Object {
             .load(include_str!(
                 "../../assets/addons/core/objects/mud_mixer.lua"
             ))
-            .set_name("example code");
+            .set_name("mud mixer");
         lua_src.exec()?;
 
-        let on_start: Function = globals.get("on_build")?;
-        on_start.call::<()>(())?;
-        let game_event_table: Result<LuaTable, LuaError> = globals.get("game_event_table");
-
-        for event in game_event_table.iter() {
-            println!("Event needs to be handled.")
-        }
+        let on_build: Function = globals.get("on_build")?;
+        on_build.call::<()>(())?;
 
         Ok(Self { lua, script_name })
     }

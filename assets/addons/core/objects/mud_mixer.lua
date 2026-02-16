@@ -38,6 +38,10 @@ function on_ten_tick()
  -- TODO process inventory item a and inventory item b into mud
  -- TODO set up trace functionality so the logs can help
  -- print("Ten Tick")
- local temp_inventory = get_inventory()
- local item_in_liquid_slot = temp_inventory.slot["liquid"]
+ -- local temp_inventory = get_inventory()
+ -- local item_in_liquid_slot = temp_inventory.slot["liquid"]
+
+ local ge = GameEvent("")
+ ge:fire()
+
 end

@@ -82,7 +82,38 @@ impl World {
         }
 
         for (object_id, object) in self.object_cache.cache.iter_mut() {
-            object.fire_tick();
+            let object_ret = object.fire_tick();
+            match object_ret {
+                Ok(object_ret_a) => {
+                    for game_event in object_ret_a {
+                        // println!("Handling event {:?}.", object_ret_a);
+                        match game_event.event_type {
+                            crate::engine::game_events::GameEventType::Nil => {
+                                println!("A nil event fired.")
+                            }
+                            crate::engine::game_events::GameEventType::NewInventory {
+                                inventory_size,
+                            } => {
+                                println!("Spawning inventory");
+
+                                let inven = Inventory { items: vec![] };
+                                self.inventory_cache
+                                    .cache
+                                    .insert(InventoryID { id: 0 }, inven);
+                            }
+                        }
+                    }
+                }
+                Err(err) => {
+                    use mlua::Error::FromLuaConversionError;
+                    match err {
+                        FromLuaConversionError { from, to, message } => {}
+                        _ => {
+                            println!("{}", err)
+                        }
+                    }
+                }
+            }
         }
         self
     }
