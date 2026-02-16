@@ -12,6 +12,7 @@ pub mod addons;
 pub mod asset_loader;
 pub mod brick;
 pub mod chunk;
+pub mod game_events;
 pub mod materials;
 pub mod object;
 pub mod paths;

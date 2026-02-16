@@ -2,6 +2,8 @@
 use std::collections::HashMap;
 
 use crate::engine::addons::register_api;
+use crate::engine::game_events::GameEvent;
+use log::info;
 use mlua::Function;
 use mlua::prelude::*;
 use serde::Deserialize;
@@ -33,6 +35,38 @@ pub struct Object {
     pub script_name: String,
 }
 impl Object {
+    pub fn get_game_events(&mut self) -> LuaResult<Vec<GameEvent>> {
+        let mut ges = vec![];
+        let lua = &self.lua;
+        let globals = lua.globals();
+        let game_event_table: LuaTable = globals.get("game_event_table")?;
+        let new_game_event_count: i32 = game_event_table.get("count")?;
+        println!(
+            "{} new game events queued by this object.",
+            new_game_event_count
+        );
+        for game_event_idx in 0..new_game_event_count {
+            let events_array: Result<GameEvent, LuaError> = game_event_table.get("events");
+        }
+
+        // let game_event_type: String = game_event_table.get("event_type")?;
+
+        // for even in game_event_table {
+        //     println!("game event {:?}", even);
+        //     let game_event_type: String =
+        //         even.get("event_type").unwrap_or("MarkerEvent".to_string());
+
+        //     let count: Result<i32, LuaError> = game_event_table.get("count")?;
+
+        //     let game_event = GameEvent {
+        //         event_type: game_event_type.to_string(),
+        //     };
+        //     info!("Game event {:?}", game_event);
+        //     ges.push(game_event);
+        // }
+
+        Ok(ges)
+    }
     pub fn fire_tick(&mut self) -> LuaResult<()> {
         let globals = self.lua.globals();
 

@@ -31,13 +31,13 @@ function on_tick()
   on_ten_tick() 
  end
  
- print("Mud mixer ticked. On tick "..machine_state.tick_count)
+ -- print("Mud mixer ticked. On tick "..machine_state.tick_count)
 end
 
 function on_ten_tick()
  -- TODO process inventory item a and inventory item b into mud
  -- TODO set up trace functionality so the logs can help
- print("Ten Tick")
+ -- print("Ten Tick")
  local temp_inventory = get_inventory()
  local item_in_liquid_slot = temp_inventory.slot["liquid"]
 end
