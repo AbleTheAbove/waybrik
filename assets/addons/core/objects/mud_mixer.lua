@@ -1,21 +1,12 @@
-
 machine_state = {}
-
-
 
 function on_build()
  print("Mud mixer placed.")
  machine_state.tick_count = 0
- game_event_table[1] = "one"
-
- for k, v in pairs(game_event_table) do
-  print(k, v)
- end
-
-
-
- -- local inventory_id = new_inventory()
+ local ge = GameEvent("NewInventory")
+ ge:fire()
 end
+
 -- When an object is broken this fires.
 function on_break()
 end
