@@ -1,13 +1,17 @@
 use log::{error, info, warn};
 
 use crate::engine::{
+    brick::InventoryID,
     chunk::{Chunk, ChunkPos},
     materials::MaterialIndex,
     paths,
     save::SaveFolder,
+    world::inventory::{Inventory, InventoryCache},
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+pub mod inventory;
+
 #[derive(Serialize, Deserialize, Clone)]
 /// This structure represents an in memory chunk.
 pub struct ChunkCache {
@@ -27,6 +31,8 @@ pub struct World {
     /// The chunk cache will be populated based on player locations.
     #[serde(skip_serializing)]
     pub chunk_cache: ChunkCache,
+    #[serde(skip_serializing)]
+    pub inventory_cache: InventoryCache,
 }
 impl World {
     /// Create a new world. Save it to disk also.
@@ -35,17 +41,19 @@ impl World {
         println!("{}", material_index);
         let save_ret = SaveFolder::new(name.clone());
         match save_ret {
-            Ok(_) => {
-                info!("World creation worked.")
-            }
+            Ok(_) => info!("World creation worked."),
             Err(_) => error!("World creation failed."),
         }
+        let mut inv_cache = InventoryCache::new();
+        let inv = Inventory { items: vec![] };
+        inv_cache.cache.insert(InventoryID { id: 0 }, inv);
         Ok(Self {
             name,
             chunk_cache: ChunkCache {
                 cache: HashMap::new(),
             },
             material_index,
+            inventory_cache: inv_cache,
         })
     }
     pub fn save(&mut self) {

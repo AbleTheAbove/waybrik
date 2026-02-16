@@ -10,6 +10,7 @@ serde = { version = "1.0.225", features = ["derive"] }
 
 
 gl = "0.10.0"
+clap = { version = "4.5.58", features = ["derive"] }
 
 
 [dependencies.sdl2]

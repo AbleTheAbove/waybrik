@@ -40,7 +40,10 @@ impl Chunk {
     pub fn new(position: ChunkPos) -> Self {
         let mut chunk_bricks = vec![];
         for _brick_chunk_idx in 0..CHUNK_VOLUME {
-            let brick = Brick { material: 0 };
+            let brick = Brick {
+                material: 0,
+                inventory_id: None,
+            };
             chunk_bricks.push(brick);
         }
         let dirty_flags = ChunkDirtyFlags {

@@ -4,3 +4,9 @@ id = 0
 id = 1
 [material.dirt]
 id = 2
+
+[material.water]
+id = 3
+
+[material.mud]
+id = 4
