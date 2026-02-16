@@ -2,14 +2,14 @@
 
 use log::{error, warn};
 
-pub mod asset_loader;
-
 use crate::engine::{
     asset_loader::{AssetBundle, load_assets},
     chunk::{Chunk, ChunkPos},
     renderer::Renderer,
     world::World,
 };
+pub mod addons;
+pub mod asset_loader;
 pub mod brick;
 pub mod chunk;
 pub mod materials;
@@ -36,6 +36,9 @@ impl WayEngine {
     pub fn new() -> Self {
         let assets = load_assets();
         let renderer = renderer::Renderer::new();
+
+        let ret = addons::addon();
+        println!("lua ret {:?}", ret);
 
         Self {
             world: None,

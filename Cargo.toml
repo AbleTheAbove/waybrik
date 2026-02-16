@@ -11,7 +11,7 @@ serde = { version = "1.0.225", features = ["derive"] }
 
 gl = "0.10.0"
 clap = { version = "4.5.58", features = ["derive"] }
-
+mlua = { version = "0.11", features = ["lua54", "vendored"] }
 
 [dependencies.sdl2]
 version = "0.31.0"
